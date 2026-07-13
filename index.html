@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Incorporaciones - Grupo Acerca</title>
+    <!-- Incluimos la librería XLSX para poder exportar informes si el gestor lo requiere -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- CABECERA CORPORATIVA -->
+    <header class="corp-header">
+        <div class="header-content">
+            <img src="logo.png" alt="grupoacerca" class="logo-img">
+        </div>
+        <div class="orange-bar"></div>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="main-container">
+
+        <!-- SCREEN 1: ACCESO / LOGIN -->
+        <section id="login-screen" class="screen active">
+            <div class="login-card">
+                <h2>Acceso al Sistema</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username">Usuario de Selección o Clave Gestor:</label>
+                        <input type="text" id="username" placeholder="ej: Acerc@sara o SUPERVISORACERCA" required autocomplete="off">
+                    </div>
+                    <button type="submit" class="btn-primary">Acceder &rarr;</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- SCREEN 2: MENÚ PRINCIPAL (VISTA DE LOTES ACTIVOS) -->
+        <section id="main-menu-screen" class="screen">
+            <div class="user-panel-card">
+                <div class="panel-header">
+                    <h2>Menú Principal — Activas (Lotes Semanales)</h2>
+                    <button id="logout-btn" class="btn-secondary">&lArr; Cerrar Sesión</button>
+                </div>
+                
+                <button id="go-to-step1-btn" class="btn-primary" style="margin-bottom: 25px;">+ Añadir Incorporación</button>
+                
+                <div class="registry-section">
+                    <h3>Lotes Registrados</h3>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Semana</th>
+                                    <th>Ciudad</th>
+                                    <th>Departamento</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lotes-table-body">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 3: CONFIGURACIÓN INICIAL DEL LOTE (NUEVAS INCORPORACIONES) -->
+        <section id="step1-screen" class="screen">
+            <div class="login-card">
+                <h2>Nuevas Incorporaciones — Parámetros</h2>
+                <form id="step1-form">
+                    <div class="form-group">
+                        <label for="inc-date">Fecha de Incorporación:</label>
+                        <input type="date" id="inc-date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="inc-city">Oficina (Ciudad):</label>
+                        <select id="inc-city" required>
+                            <option value="" disabled selected>Selecciona una ciudad...</option>
+                            <option value="Sevilla">Sevilla</option>
+                            <option value="Madrid">Madrid</option>
+                            <option value="Valencia">Valencia</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inc-dept">Departamento:</label>
+                        <select id="inc-dept" required>
+                            <option value="" disabled selected>Selecciona un departamento...</option>
+                            <option value="Energia entrantes">Energia entrantes</option>
+                            <option value="Energia Salientes">Energia Salientes</option>
+                            <option value="Energia Pymes">Energia Pymes</option>
+                            <option value="Telecomunicaciones Entrantes">Telecomunicaciones Entrantes</option>
+                            <option value="Telecomunicaciones Salientes">Telecomunicaciones Salientes</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 25px;">
+                        <button type="button" id="cancel-to-menu-btn" class="btn-secondary" style="background-color: #666;">Cancelar</button>
+                        <button type="submit" class="btn-primary" style="flex: 1;">Continuar &rarr;</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- SCREEN 4: PANTALLA DE DETALLE / ALTA DE CANDIDATOS MASIVA (CROQUIS 3) -->
+        <section id="step2-screen" class="screen" style="max-width: 95%; margin: 0 auto;">
+            <div class="user-panel-card">
+                <h2>Alta de Candidatos — Semana <span id="summary-week-label">-</span></h2>
+                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
+                    Estructurando incorporaciones para la sede de <strong id="summary-city-label">-</strong> en el departamento de <strong id="summary-dept-label">-</strong>.
+                </p>
+
+                <!-- BOTÓN DE CARGA MASIVA DE DOCUMENTOS -->
+                <div style="background: #fdf6f0; border: 2px dashed #f15a24; padding: 20px; text-align: center; border-radius: 6px; margin-bottom: 25px;">
+                    <label for="dni-multiple-uploader" class="btn-primary" style="display: inline-block; cursor: pointer; background-color: #f15a24;">
+                        📁 Cargar todos los DNI / NIE (Múltiple)
+                    </label>
+                    <input type="file" id="dni-multiple-uploader" multiple accept="image/*,application/pdf" style="display: none;">
+                    <p style="font-size: 12px; color: #555; margin-top: 8px;">Sube las imágenes o PDFs de los documentos. El sistema los separará individualmente y extraerá la información.</p>
+                </div>
+
+                <form id="candidates-massive-form">
+                    <div class="table-responsive">
+                        <table class="data-table" style="min-width: 1000px;">
+                            <thead>
+                                <tr>
+                                    <th>Nombre Completo</th>
+                                    <th>DNI / NIE</th>
+                                    <th>Fecha Nacimiento</th>
+                                    <th>Nº Teléfono</th>
+                                    <th>Email</th>
+                                    <th>Turno</th>
+                                    <th>Jornada</th>
+                                    <th>Documento</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dynamic-candidates-rows">
+                                <!-- Se inyectan las filas interactivas por cada DNI subido o fila añadida -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 15px; text-align: left;">
+                        <button type="button" id="add-manual-row-btn" class="btn-secondary" style="background-color: #0b5ca3; color: #fff;">+ Añadir Fila Manual</button>
+                    </div>
+
+                    <!-- RECUADRO DE COMENTARIOS ADICIONALES -->
+                    <div class="form-group" style="margin-top: 30px;">
+                        <label for="lote-comment"><strong>Comentarios generales del lote:</strong></label>
+                        <textarea id="lote-comment" rows="4" placeholder="Escribe aquí anotaciones comerciales, incidencias o comentarios sobre las incorporaciones de esta semana..." style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; outline: none; font-size: 14px;"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 15px; margin-top: 30px;">
+                        <button type="button" id="back-to-step1-btn" class="btn-secondary" style="background-color: #666;">Atrás</button>
+                        <button type="submit" class="btn-primary" style="flex: 1;">Guardar Lote Completo</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- SCREEN 5: VISUALIZACIÓN DE CANDIDATOS ACTIVOS EN UN LOTE SELECCIONADO (CROQUIS 2) -->
+        <section id="lote-view-screen" class="screen" style="max-width: 95%; margin: 0 auto;">
+            <div class="user-panel-card">
+                <div class="panel-header">
+                    <div>
+                        <h2 style="margin: 0;">Activos - Semana <span id="view-week-title">-</span></h2>
+                        <p style="margin: 5px 0 0 0; color: #666;" id="view-lote-subtitle"></p>
+                    </div>
+                    <button id="back-to-lotes-list-btn" class="btn-secondary">&lArr; Volver al Menú</button>
+                </div>
+
+                <div class="table-responsive" style="margin-top: 20px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Ciudad</th>
+                                <th>Departamento</th>
+                                <th>Turno</th>
+                                <th>Jornada</th>
+                                <th>Mail</th>
+                                <th>Nº Teléfono</th>
+                                <th>Documento</th>
+                            </tr>
+                        </thead>
+                        <tbody id="view-candidates-table-body">
+                            <!-- Filas de datos del lote -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- COMENTARIO RECOGIDO -->
+                <div id="view-comment-box" style="margin-top: 25px; padding: 15px; background: #f9f9f9; border-left: 4px solid #f15a24; border-radius: 4px; display: none;">
+                    <h4>Comentarios del Lote:</h4>
+                    <p id="view-comment-text" style="font-size: 14px; color: #333; white-space: pre-line; margin-top: 5px;"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 6: MODO GESTOR / PANEL DE SUPERVISIÓN GLOBAL -->
+        <section id="manager-screen" class="screen" style="max-width: 95%; margin: 0 auto;">
+            <div class="user-panel-card">
+                <div class="panel-header" style="border-bottom-color: #f15a24;">
+                    <h2>Modo Gestor — Panel de Supervisión Global</h2>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <button id="export-excel-btn" class="btn-primary" style="background-color: #111; font-size: 13px; padding: 8px 12px;">
+                            📄 Exportar Todo (.xlsx)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive" style="margin-top: 20px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Responsable</th>
+                                <th>Semana</th>
+                                <th>Sede</th>
+                                <th>Departamento</th>
+                                <th>Total Candidatos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manager-global-table-body">
+                            <!-- Datos del supervisor -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <button id="exit-manager-btn" class="btn-secondary" style="margin-top: 25px; background-color: #111; color:#fff;">&lArr; Salir del Modo Gestor</button>
+            </div>
+        </section>
+
+        <!-- VENTANA EMERGENTE (POP-UP MODAL VISOR DE DNI 👁️) -->
+        <div id="document-modal" class="modal-overlay">
+            <div class="modal-card" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3>Visualizador de Documento</h3>
+                    <span id="close-modal-btn" class="modal-close-x">&times;</span>
+                </div>
+                <div class="modal-body" style="text-align: center; padding: 20px;">
+                    <div id="modal-document-render" style="max-width: 100%; height: auto; min-height: 250px; display: flex; align-items: center; justify-content: center; background: #eee; border-radius: 4px;">
+                        <!-- Imagen o PDF renderizado -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
