@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Incorporaciones - Grupo Acerca</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        /* Ajustes rápidos integrados para cumplir el diseño ultra ancho de extremo a extremo */
+        .main-container {
+            max-width: 98% !important;
+            width: 98% !important;
+        }
+        .user-panel-card {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box;
+        }
+        .btn-centered {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .input-table {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn-obs {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            color: white;
+            font-weight: bold;
+        }
+        .btn-obs-add { background-color: #0b5ca3; }
+        .btn-obs-view { background-color: #f15a24; }
+    </style>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- CABECERA CORPORATIVA -->
+    <header class="corp-header">
+        <div class="header-content">
+            <img src="logo.png" alt="grupoacerca" class="logo-img">
+        </div>
+        <div class="orange-bar"></div>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="main-container">
+
+        <!-- SCREEN 1: ACCESO / LOGIN -->
+        <section id="login-screen" class="screen active">
+            <div class="login-card">
+                <h2>Acceso al Sistema</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username">Usuario de Selección o Clave Gestor:</label>
+                        <input type="text" id="username" placeholder="" required autocomplete="off">
+                    </div>
+                    <button type="submit" class="btn-primary">Acceder &rarr;</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- SCREEN 2: MENÚ PRINCIPAL (VISTA ANCHA DE LOTES) -->
+        <section id="main-menu-screen" class="screen">
+            <div class="user-panel-card">
+                <div class="panel-header">
+                    <h2>Nuevas Incorporaciones</h2>
+                    <button id="logout-btn" class="btn-secondary btn-centered" style="min-width: 120px;">Cerrar Sesión</button>
+                </div>
+                
+                <button id="go-to-step1-btn" class="btn-primary" style="margin-bottom: 25px;">+ Añadir Incorporación</button>
+                
+                <div class="registry-section">
+                    <h3>Lotes Registrados</h3>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Semana</th>
+                                    <th>Ciudad</th>
+                                    <th>Departamento</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lotes-table-body">
+                                <!-- Dinámico -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 3: CONFIGURACIÓN INICIAL DEL LOTE -->
+        <section id="step1-screen" class="screen">
+            <div class="login-card">
+                <h2>Nuevas Incorporaciones — Parámetros</h2>
+                <form id="step1-form">
+                    <div class="form-group">
+                        <label for="inc-date">Fecha de Incorporación:</label>
+                        <input type="date" id="inc-date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="inc-city">Oficina (Ciudad):</label>
+                        <select id="inc-city" required>
+                            <option value="" disabled selected>Selecciona una ciudad...</option>
+                            <option value="Sevilla">Sevilla</option>
+                            <option value="Madrid">Madrid</option>
+                            <option value="Valencia">Valencia</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inc-dept">Departamento:</label>
+                        <select id="inc-dept" required>
+                            <option value="" disabled selected>Selecciona un departamento...</option>
+                            <option value="Energia entrantes">Energia entrantes</option>
+                            <option value="Energia Salientes">Energia Salientes</option>
+                            <option value="Energia Pymes">Energia Pymes</option>
+                            <option value="Telecomunicaciones Entrantes">Telecomunicaciones Entrantes</option>
+                            <option value="Telecomunicaciones Salientes">Telecomunicaciones Salientes</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 25px;">
+                        <button type="button" id="cancel-to-menu-btn" class="btn-secondary" style="background-color: #666;">Cancelar</button>
+                        <button type="submit" class="btn-primary" style="flex: 1;">Continuar &rarr;</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- SCREEN 4: EDICIÓN DE CANDIDATOS MASIVA (ULTRA ANCHA DE EXTREMO A EXTREMO) -->
+        <section id="step2-screen" class="screen">
+            <div class="user-panel-card">
+                <h2>Alta de Candidatos — Semana <span id="summary-week-label">-</span></h2>
+                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
+                    Estructurando incorporaciones para la sede de <strong id="summary-city-label">-</strong> en el departamento de <strong id="summary-dept-label">-</strong>.
+                </p>
+
+                <div style="background: #fdf6f0; border: 2px dashed #f15a24; padding: 20px; text-align: center; border-radius: 6px; margin-bottom: 25px;">
+                    <label for="dni-multiple-uploader" class="btn-primary" style="display: inline-block; cursor: pointer; background-color: #f15a24;">
+                        📁 Cargar todos los DNI / NIE (Múltiple)
+                    </label>
+                    <input type="file" id="dni-multiple-uploader" multiple accept="image/*,application/pdf" style="display: none;">
+                    <p style="font-size: 12px; color: #555; margin-top: 8px;">Sube las imágenes o PDFs. El sistema creará las filas en blanco asignando los documentos.</p>
+                </div>
+
+                <form id="candidates-massive-form">
+                    <div class="table-responsive">
+                        <table class="data-table" style="min-width: 1200px;">
+                            <thead>
+                                <tr>
+                                    <th>Nombre Completo</th>
+                                    <th>DNI / NIE</th>
+                                    <th>Fecha Nacimiento</th>
+                                    <th>Nº Teléfono</th>
+                                    <th>Email</th>
+                                    <th>Turno</th>
+                                    <th>Jornada</th>
+                                    <th>Documento</th>
+                                    <th>Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dynamic-candidates-rows">
+                                <!-- Se inyectan filas interactivas -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 20px; text-align: left;">
+                        <button type="button" id="add-manual-row-btn" class="btn-secondary" style="background-color: #0b5ca3; color: #fff;">+ Añadir Fila Manual</button>
+                    </div>
+
+                    <div style="display: flex; gap: 15px; margin-top: 40px;">
+                        <button type="button" id="back-to-step1-btn" class="btn-secondary" style="background-color: #666;">Atrás</button>
+                        <button type="submit" class="btn-primary" style="flex: 1;">Guardar Lote Completo</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- SCREEN 5: VISUALIZACIÓN DE CANDIDATOS REGISTRADOS (ANCHO COMPLETO) -->
+        <section id="lote-view-screen" class="screen">
+            <div class="user-panel-card">
+                <div class="panel-header">
+                    <div>
+                        <h2 style="margin: 0;">Activos - Semana <span id="view-week-title">-</span></h2>
+                        <p style="margin: 5px 0 0 0; color: #666;" id="view-lote-subtitle"></p>
+                    </div>
+                    <button id="back-to-lotes-list-btn" class="btn-secondary btn-centered">Volver al Menú</button>
+                </div>
+
+                <div class="table-responsive" style="margin-top: 20px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Ciudad</th>
+                                <th>Departamento</th>
+                                <th>Turno</th>
+                                <th>Jornada</th>
+                                <th>Mail</th>
+                                <th>Nº Teléfono</th>
+                                <th>Documento</th>
+                                <th>Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="view-candidates-table-body">
+                            <!-- Filas de datos -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 6: MODO GESTOR / SUPERVISOR -->
+        <section id="manager-screen" class="screen">
+            <div class="user-panel-card">
+                <div class="panel-header" style="border-bottom-color: #f15a24;">
+                    <h2>Modo Gestor — Panel de Supervisión Global</h2>
+                    <button id="export-excel-btn" class="btn-primary" style="background-color: #111; font-size: 13px; padding: 8px 12px;">
+                        📄 Exportar Todo (.xlsx)
+                    </button>
+                </div>
+
+                <div class="table-responsive" style="margin-top: 20px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Responsable</th>
+                                <th>Semana</th>
+                                <th>Sede</th>
+                                <th>Departamento</th>
+                                <th>Total Candidatos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manager-global-table-body">
+                            <!-- Datos globales -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <button id="exit-manager-btn" class="btn-secondary btn-centered" style="margin-top: 25px; background-color: #111; color:#fff;">Salir del Modo Gestor</button>
+            </div>
+        </section>
+
+        <!-- POP-UP MODAL 1: VISOR DE DOCUMENTOS -->
+        <div id="document-modal" class="modal-overlay">
+            <div class="modal-card" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3>Visualizador de Documento</h3>
+                    <span id="close-modal-btn" class="modal-close-x">&times;</span>
+                </div>
+                <div class="modal-body" style="text-align: center; padding: 20px;">
+                    <div id="modal-document-render" style="max-width: 100%; background: #eee; border-radius: 4px; padding: 10px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- POP-UP MODAL 2: AÑADIR/VER COMENTARIOS Y OBSERVACIONES INDIVIDUALES -->
+        <div id="obs-modal" class="modal-overlay">
+            <div class="modal-card" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3>Observaciones del Candidato</h3>
+                    <span id="close-obs-modal-btn" class="modal-close-x">&times;</span>
+                </div>
+                <div class="modal-body" style="padding: 20px;">
+                    <p style="font-size: 13px; color:#555; margin-bottom: 8px;">Escribe las anotaciones específicas para este candidato:</p>
+                    <textarea id="obs-modal-textarea" rows="6" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; outline: none; box-sizing: border-box; font-size: 14px;"></textarea>
+                    <div style="text-align: right; margin-top: 15px;">
+                        <button id="save-obs-modal-btn" class="btn-primary" style="padding: 8px 16px;">Guardar Observación</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
