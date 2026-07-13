@@ -1,0 +1,382 @@
+/* --- VARIABLES Y CONFIGURACIÓN GENERAL --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #0b5ca3; /* El azul corporativo de fondo */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- CABECERA CORPORATIVA --- */
+.corp-header {
+    background-color: #ffffff;
+    width: 100%;
+    position: relative;
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+}
+
+.logo-img {
+    height: 114px;
+    display: block;
+}
+
+.orange-bar {
+    height: 5px;
+    background-color: #f15a24; /* El naranja corporativo */
+    width: 100%;
+}
+
+/* --- CONTENEDOR DE PANTALLAS --- */
+.main-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    width: 100%;
+}
+
+/* Control de visibilidad de pantallas */
+.screen {
+    display: none; /* Por defecto todo oculto */
+    width: 100%;
+    max-width: 500px; /* Tamaño por defecto para el Login */
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.screen.active {
+    display: block; /* Solo se muestra la que tenga la clase 'active' */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- TARJETA DE LOGIN --- */
+.login-card {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    width: 100%;
+}
+
+.login-card h2 {
+    font-size: 24px;
+    color: #111111;
+    margin-bottom: 25px;
+    font-weight: 700;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    color: #555555;
+    margin-bottom: 8px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    font-size: 15px;
+    color: #111111;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+    border-color: #0b5ca3;
+}
+
+/* --- BOTONES --- */
+.btn-primary {
+    background-color: #111111;
+    color: #ffffff;
+    border: none;
+    padding: 12px 30px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #222222;
+}
+
+/* --- PIE DE PÁGINA LOGIN --- */
+.login-footer-text {
+    text-align: center;
+    color: #ffffff;
+    margin-top: 25px;
+    font-size: 14px;
+    line-height: 1.5;
+    opacity: 0.9;
+}
+
+.login-footer-text .highlight {
+    color: #f15a24;
+    font-weight: bold;
+}
+/* --- PANTALLA MENÚ DE USUARIO Y GESTOR --- */
+.user-panel-card {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 1100px; /* Al ser una tabla, esta tarjeta es más ancha */
+}
+
+/* Forzar que cuando esta pantalla esté activa se ensanche automáticamente */
+#user-menu-screen.active, #manager-screen.active {
+    max-width: 1100px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #0b5ca3;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+.user-email-text {
+    color: #f15a24;
+    font-weight: bold;
+}
+
+.btn-secondary {
+    background-color: #111111;
+    color: #ffffff;
+    border: none;
+    padding: 8px 15px;
+    font-size: 13px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.registry-section h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #111111;
+}
+
+.filter-group {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-group label {
+    font-size: 14px;
+}
+
+.filter-group select {
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+/* --- TABLAS --- */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.data-table th {
+    background-color: #0b5ca3;
+    color: #ffffff;
+    text-align: left;
+    padding: 12px;
+    font-weight: 600;
+}
+
+.data-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #dddddd;
+    color: #333333;
+    vertical-align: top;
+}
+
+.bold-text {
+    font-weight: bold;
+}
+
+.summary-cell {
+    line-height: 1.5;
+    max-width: 500px;
+}
+
+/* --- INICIALES DE LOS DÍAS (BADGES) --- */
+.day-badges {
+    display: flex;
+    gap: 5px;
+}
+
+.badge {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid #cccccc;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 12px;
+    color: #333;
+    cursor: pointer;
+}
+
+.badge:hover {
+    background-color: #e0e0e0;
+}
+/* --- VENTANA EMERGENTE POP-UP (MODAL) --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semitransparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Cuando se activa el modal */
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-card {
+    background-color: #ffffff;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 6px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh; /* Máximo 80% del alto de la pantalla */
+    animation: scaleUp 0.2s ease-in-out;
+}
+
+@keyframes scaleUp {
+    from { transform: scale(0.9); }
+    to { transform: scale(1); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.modal-header h3 {
+    color: #0b5ca3;
+    font-size: 18px;
+}
+
+.modal-close-x {
+    font-size: 26px;
+    font-weight: bold;
+    color: #999999;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.modal-close-x:hover {
+    color: #111111;
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto; /* ¡AQUÍ ESTÁ EL SCROLL AUTOMÁTICO! */
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333333;
+}
+/* --- ICONO DE INFORMACIÓN CON POP-UP NATIVO --- */
+.info-icon {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #0b5ca3;
+    color: #ffffff;
+    width: 16px;
+    height: 16px;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 50%;
+    cursor: pointer;
+    font-style: italic;
+}
+
+.info-icon:hover {
+    background-color: #f15a24;
+}
+/* --- FORMATO DEL RESUMEN DE IA EN LA TABLA --- */
+.ia-summary-box {
+    font-size: 13px;
+    line-height: 1.5;
+}
+.ia-summary-box p {
+    margin-bottom: 8px;
+}
+.ia-tag {
+    display: inline-block;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    margin-right: 5px;
+}
+.ia-tag.fuertes { background-color: #e2f0d9; color: #385723; }
+.ia-tag.mejora { background-color: #fce4d6; color: #c65911; }
+/* --- ESTILO PARA DÍAS PENDIENTES DE RELLENAR --- */
+.badge.pending {
+    background-color: #e0e0e0;
+    color: #aaaaaa;
+    border-style: dashed; /* Bordes discontinuos para denotar que está vacío */
+    opacity: 0.5;         /* Tono medio transparente */
+    cursor: not-allowed;  /* Cambia el cursor para indicar que no hay contenido */
+}
