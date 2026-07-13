@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario - Grupo Acerca</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- CABECERA CORPORATIVA (Común para todas las pantallas) -->
+    <header class="corp-header">
+        <div class="header-content">
+            <!-- Si tu logo se llama diferente, cambia el nombre aquí -->
+            <img src="logo.png" alt="grupoacerca" class="logo-img">
+        </div>
+        <div class="orange-bar"></div>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="main-container">
+
+        <!-- SCREEN 1: ACCESO / LOGIN -->
+        <section id="login-screen" class="screen active">
+            <div class="login-card">
+                <h2>Acceso al Sistema</h2>
+                
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username">Usuario (Correo Electrónico / Código Gestor):</label>
+                        <input type="text" id="username" placeholder="ejemplo@acerca.info" required autocomplete="off">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Acceder &rarr;</button>
+                </form>
+            </div>
+            
+            <p class="login-footer-text">
+                Accede con tu correo corporativo <span class="highlight">@acerca.info</span><br>
+                o con la clave de gestor.
+            </p>
+        </section>
+
+       <!-- SCREEN 2: MENÚ PRINCIPAL USUARIO -->
+        <section id="user-menu-screen" class="screen">
+            <div class="user-panel-card">
+                <div class="panel-header">
+                    <h2>Menú Principal — Usuario: <span id="display-user-email" class="user-email-text"></span></h2>
+                    <button id="logout-btn" class="btn-secondary">&lArr; Cerrar Sesión</button>
+                </div>
+                
+                <button id="create-new-btn" class="btn-primary" style="margin-bottom: 25px;">Crear nuevo</button>
+                
+                <div class="registry-section">
+                    <h3>Registro</h3>
+                    <div class="filter-group">
+                        <label for="user-filter-week">Filtrar por semana:</label>
+                        <select id="user-filter-week">
+                            <option value="all">Todas</option>
+                            <option value="28">Semana 28</option>
+                        </select>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Semana</th>
+                                    <th>Anotaciones</th>
+                                    <th>Resumen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table-body">
+                                <!-- Datos de prueba idénticos a tu imagen -->
+                                <tr>
+                                    <td class="bold-text">Semana 28</td>
+                                    <td>
+                                        <div class="day-badges">
+                                            <span class="badge">L</span>
+                                            <span class="badge">M</span>
+                                            <span class="badge">X</span>
+                                            <span class="badge">J</span>
+                                            <span class="badge">V</span>
+                                        </div>
+                                    </td>
+                                    <td class="summary-cell">
+                                        El grupo ha mostrado una evolución positiva a lo largo de la semana, destacando por su buena actitud, implicación y capacidad de aprendizaje. Han demostrado iniciativa, como la lectura voluntaria de los textos legales fuera del horario de formación, y una disposición constante para aplicar las correcciones recibidas. En varios momentos han conseguido buenos resultados comerciales, con especial capacidad para recuperarse tras las dificultades...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+<!-- SCREEN 3A: CREACIÓN - PASO 1 (FECHA Y SEMANA) -->
+        <section id="form-step1-screen" class="screen">
+            <div class="login-card">
+                <h2>Nuevo Registro — Paso 1</h2>
+                
+                <form id="step1-form">
+                    <div class="form-group">
+                        <label for="form-date">Fecha:</label>
+                        <input type="date" id="form-date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="form-week" style="display: inline-flex; align-items: center; gap: 5px;">
+                            Semana 
+                            <span class="info-icon" title="La semana a reflejar aparece en el archivo de talento +">i</span>
+                        </label>
+                        <input type="number" id="form-week" placeholder="Ej: 28" min="1" max="53" required>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 25px;">
+                        <button type="button" id="back-to-menu-btn" class="btn-secondary" style="background-color: #666;">Cancelar</button>
+                        <button type="submit" class="btn-primary" style="flex: 1;">Continuar &rarr;</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- SCREEN 3B: CREACIÓN - PASO 2 (COMENTARIOS DIARIOS) -->
+        <section id="form-step2-screen" class="screen">
+            <div class="login-card">
+                <h2>Anotaciones Diarias</h2>
+                <p style="margin-bottom: 20px; color: #555; font-size: 14px;">
+                    Semana seleccionada: <strong id="summary-chosen-week" style="color: #f15a24;">-</strong>
+                </p>
+                
+                <form id="step2-form">
+                    <div class="form-group">
+                        <label>Día de la semana correspondiente:</label>
+                        <!-- Aquí se inyectará automáticamente el día en español -->
+                        <input type="text" id="calculated-day" readonly style="background-color: #eee; font-weight: bold; color: #0b5ca3;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="day-comment">Comentarios de este día:</label>
+                        <textarea id="day-comment" rows="6" placeholder="Escribe aquí las anotaciones comerciales del día..." required style="width: 100%; padding: 12px; border: 1px solid #cccccc; border-radius: 4px; font-size: 15px; resize: vertical; outline: none;"></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 25px;">
+                        <button type="button" id="back-to-step1-btn" class="btn-secondary" style="background-color: #666;">Atrás</button>
+                        <button type="submit" class="btn-primary" style="flex: 1;">Guardar Registro</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+<!-- VENTANA EMERGENTE (POP-UP MODAL) PARA ANOTACIONES DIARIAS -->
+        <div id="notes-modal" class="modal-overlay">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3 id="modal-day-title">Anotaciones del Día</h3>
+                    <span id="close-modal-btn" class="modal-close-x">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p id="modal-text-content">Aquí va el texto...</p>
+                </div>
+            </div>
+        </div>
+        <!-- SCREEN 4: MODO GESTOR - PANEL DE SUPERVISIÓN -->
+        <section id="manager-screen" class="screen">
+            <div class="user-panel-card">
+                <div class="panel-header" style="border-bottom-color: #f15a24;">
+                    <h2>Modo Gestor — Panel de Supervisión</h2>
+                    
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div class="filter-group" style="margin-bottom: 0;">
+                            <label for="manager-filter-week">Seleccione semana para filtrar:</label>
+                            <select id="manager-filter-week">
+                                <option value="all">Todas</option>
+                                <option value="28">Semana 28</option>
+                                <option value="27">Semana 27</option>
+                            </select>
+                        </div>
+                        
+                        <div style="text-align: right;">
+                            <span style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px;">Exportar datos</span>
+                            <button id="export-excel-btn" class="btn-primary" style="background-color: #111; font-size: 13px; display: inline-flex; align-items: center; gap: 5px; padding: 8px 12px;">
+                                📄 Exportar .xlsx
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Semana</th>
+                                <th>Anotaciones</th>
+                                <th>Resumen Semanal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manager-table-body">
+                            <!-- Datos cargados dinámicamente o simulados por JS -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <button id="exit-manager-btn" class="btn-secondary" style="margin-top: 25px; background-color: #111;">&lArr; Salir del Modo Gestor</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
