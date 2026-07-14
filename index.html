@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma Corporativa - Grupo Acerca</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        /* CONFIGURACIÓN MAQUETA DE EXTREMO A EXTREMO PARA SELECCIÓN */
+        .full-width-container {
+            width: 98% !important;
+            max-width: 98% !important;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        .user-panel-card.full-bleed {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box;
+        }
+        .input-table {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn-centered {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .btn-obs-action {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .btn-obs-add { background-color: #0b5ca3; }
+        .btn-obs-view { background-color: #f15a24; }
+        .badge-interactive {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #0b5ca3;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .badge-interactive.pending {
+            background: #e0e0e0;
+            color: #666;
+            cursor: default;
+        }
+    </style>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- CABECERA CORPORATIVA -->
+    <header class="corp-header">
+        <div class="header-content">
+            <img src="logo.png" alt="grupoacerca" class="logo-img">
+        </div>
+        <div class="orange-bar"></div>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main id="main-app-container" class="main-container">
+
+        <!-- SCREEN 1: ACCESO / LOGIN -->
+        <section id="login-screen" class="screen active">
+            <div class="login-card">
+                <h2>Acceso al Sistema</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username">Usuario de Selección o Clave Gestor:</label>
+                        <input type="text" id="username" placeholder="" required autocomplete="off">
+                    </div>
+                    <button type="submit" class="btn-primary">Acceder &rarr;</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- SCREEN 2: MENÚ PRINCIPAL DE VENTAS / SALA ORIGINAL -->
+        <section id="sales-menu-screen" class="screen">
+            <div class="user-panel-card">
+                <div class="panel-header">
+                    <h2>Panel de Control — Sala</h2>
+                    <button id="sales-logout-btn" class="btn-secondary btn-centered">Cerrar Sesión</button>
+                </div>
+                <p style="margin-top:-10px; margin-bottom:20px; color:#555;">Bienvenido: <strong class="display-active-user"></strong></p>
+                
+                <button id="sales-create-btn" class="btn-primary" style="margin-bottom: 25px;">+ Nota Diaria</button>
+                
+                <div class="registry-section">
+                    <h3>Registros Diarios</h3>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Semana</th>
+                                    <th>Anotaciones</th>
+                                    <th>Resumen IA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sales-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 3: PASO 1 VENTAS (FECHA Y SEMANA) -->
+        <section id="sales-step1-screen" class="screen">
+            <div class="login-card">
+                <h2>Registrar Nota Diaria — Sala</h2>
+                <form id="sales-step1-form">
+                    <div class="form-group">
+                        <label for="sales-date">Selecciona la Fecha:</label>
+                        <input type="date" id="sales-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sales-week-input">Número de Semana:</label>
+                        <input type="number" id="sales-week-input" required min="1" max="53">
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" id="sales-back-menu-btn" class="btn-secondary" style="background:#666;">Volver</button>
+                        <button type="submit" class="btn-primary" style="flex:1;">Siguiente &rarr;</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- SCREEN 4: PASO 2 VENTAS (COMENTARIO DIARIO) -->
+        <section id="sales-step2-screen" class="screen">
+            <div class="login-card">
+                <h2>Anotación de Sala</h2>
+                <p id="sales-summary-week-label" style="font-weight:bold; color:#0b5ca3;"></p>
+                <form id="sales-step2-form">
+                    <div class="form-group">
+                        <label for="sales-calc-day">Día de la semana detectado:</label>
+                        <input type="text" id="sales-calc-day" readonly style="background:#eee;">
+                    </div>
+                    <div class="form-group">
+                        <label for="sales-day-comment">Escribe el informe/comentario del día:</label>
+                        <textarea id="sales-day-comment" rows="5" required></textarea>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" id="sales-back-step1-btn" class="btn-secondary" style="background:#666;">Atrás</button>
+                        <button type="submit" class="btn-primary" style="flex:1;">Guardar Día</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- SCREEN 5: MENÚ PRINCIPAL SELECCIÓN / RRHH (ANCHO TOTAL EXTREMO A EXTREMO) -->
+        <section id="hr-menu-screen" class="screen">
+            <div class="user-panel-card full-bleed">
+                <div class="panel-header">
+                    <h2>Nuevas Incorporaciones — Menú Principal</h2>
+                    <button id="hr-logout-btn" class="btn-secondary btn-centered" style="min-width: 120px;">Cerrar Sesión</button>
+                </div>
+                <p style="margin-top:-10px; margin-bottom:20px; color:#555;">Usuario activo: <strong class="display-active-user"></strong></p>
+
+                <button id="hr-go-create-btn" class="btn-primary" style="margin-bottom: 25px;">+ Añadir Incorporación</button>
+
+                <div class="registry-section">
+                    <h3>Lotes Registrados Anteriores</h3>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Semana</th>
+                                    <th>Ciudad</th>
+                                    <th>Departamento</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hr-lotes-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 6: PARÁMETROS INICIALES SELECCIÓN -->
+        <section id="hr-step1-screen" class="screen">
+            <div class="login-card">
+                <h2>Nuevas Incorporaciones — Parámetros</h2>
+                <form id="hr-step1-form">
+                    <div class="form-group">
+                        <label for="hr-inc-date">Fecha de Incorporación:</label>
+                        <input type="date" id="hr-inc-date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="hr-inc-city">Oficina (Ciudad):</label>
+                        <select id="hr-inc-city" required>
+                            <option value="" disabled selected>Selecciona una ciudad...</option>
+                            <option value="Sevilla">Sevilla</option>
+                            <option value="Madrid">Madrid</option>
+                            <option value="Valencia">Valencia</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hr-inc-dept">Departamento:</label>
+                        <select id="hr-inc-dept" required>
+                            <option value="" disabled selected>Selecciona un departamento...</option>
+                            <option value="Energia entrantes">Energia entrantes</option>
+                            <option value="Energia Salientes">Energia Salientes</option>
+                            <option value="Energia Pymes">Energia Pymes</option>
+                            <option value="Telecomunicaciones Entrantes">Telecomunicaciones Entrantes</option>
+                            <option value="Telecomunicaciones Salientes">Telecomunicaciones Salientes</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 25px;">
+                        <button type="button" id="hr-cancel-to-menu-btn" class="btn-secondary" style="background-color: #666;">Cancelar</button>
+                        <button type="submit" class="btn-primary" style="flex: 1;">Continuar &rarr;</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- SCREEN 7: EDICIÓN DE CANDIDATOS MASIVA SELECCIÓN (ANCHO TOTAL EXTREMO A EXTREMO) -->
+        <section id="hr-step2-screen" class="screen">
+            <div class="user-panel-card full-bleed">
+                <h2>Alta de Candidatos — Semana <span id="hr-summary-week-label">-</span></h2>
+                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
+                    Estructurando altas para la sede de <strong id="hr-summary-city-label">-</strong> en el departamento de <strong id="hr-summary-dept-label">-</strong>.
+                </p>
+
+                <div style="background: #fdf6f0; border: 2px dashed #f15a24; padding: 20px; text-align: center; border-radius: 6px; margin-bottom: 25px;">
+                    <label for="hr-dni-uploader" class="btn-primary" style="display: inline-block; cursor: pointer; background-color: #f15a24;">
+                        📁 Cargar todos los DNI / NIE (Múltiple)
+                    </label>
+                    <input type="file" id="hr-dni-uploader" multiple accept="image/*,application/pdf" style="display: none;">
+                </div>
+
+                <form id="hr-candidates-form">
+                    <div class="table-responsive">
+                        <table class="data-table" style="width: 100%; min-width: 1200px;">
+                            <thead>
+                                <tr>
+                                    <th>Nombre Completo</th>
+                                    <th>DNI / NIE</th>
+                                    <th>Fecha Nacimiento</th>
+                                    <th>Nº Teléfono</th>
+                                    <th>Email</th>
+                                    <th>Turno</th>
+                                    <th>Jornada</th>
+                                    <th>Documento</th>
+                                    <th>Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hr-dynamic-rows-container"></tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 20px; text-align: left;">
+                        <button type="button" id="hr-add-manual-row-btn" class="btn-secondary" style="background-color: #0b5ca3; color: #fff;">+ Añadir Fila Manual</button>
+                    </div>
+
+                    <div style="display: flex; gap: 15px; margin-top: 40px;">
+                        <button type="button" id="hr-back-to-step1-btn" class="btn-secondary" style="background-color: #666;">Atrás</button>
+                        <button type="submit" class="btn-primary" style="flex: 1;">Guardar Lote Completo</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- SCREEN 8: VER CANDIDATOS DE UN LOTE GUARDADO -->
+        <section id="hr-lote-view-screen" class="screen">
+            <div class="user-panel-card full-bleed">
+                <div class="panel-header">
+                    <div>
+                        <h2 style="margin: 0;">Activos - Semana <span id="hr-view-week-title">-</span></h2>
+                        <p style="margin: 5px 0 0 0; color: #666;" id="hr-view-lote-subtitle"></p>
+                    </div>
+                    <button id="hr-back-to-list-btn" class="btn-secondary btn-centered">Volver al Menú</button>
+                </div>
+
+                <div class="table-responsive" style="margin-top: 20px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Ciudad</th>
+                                <th>Departamento</th>
+                                <th>Turno</th>
+                                <th>Jornada</th>
+                                <th>Mail</th>
+                                <th>Nº Teléfono</th>
+                                <th>Documento</th>
+                                <th>Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hr-view-candidates-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 9: MODO GESTOR / SUPERVISOR ORIGINAL (SALA) -->
+        <section id="manager-screen" class="screen">
+            <div class="user-panel-card">
+                <div class="panel-header" style="border-bottom-color: #0b5ca3;">
+                    <h2>Modo Gestor — Panel de Supervisión (Sala)</h2>
+                    <button id="manager-export-excel-btn" class="btn-primary" style="background-color: #111; font-size: 13px;">📄 Exportar Historial (.xlsx)</button>
+                </div>
+                <div class="table-responsive" style="margin-top: 20px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Responsable</th>
+                                <th>Semana</th>
+                                <th>Días Guardados</th>
+                                <th>Resumen de Campaña</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manager-table-body"></tbody>
+                    </table>
+                </div>
+                <button id="exit-manager-btn" class="btn-secondary btn-centered" style="margin-top: 25px; background:#111; color:#fff;">Salir del Modo Gestor</button>
+            </div>
+        </section>
+
+        <!-- MODAL 1: TEXTOS DIARIOS SALA -->
+        <div id="notes-modal" class="modal-overlay">
+            <div class="modal-card">
+                <div class="modal-header"><h3 id="modal-day-title"></h3><span id="close-modal-btn" class="modal-close-x">&times;</span></div>
+                <div class="modal-body"><p id="modal-text-content" style="white-space: pre-line; padding: 15px; background: #f9f9f9; border-radius: 4px; font-size:14px;"></p></div>
+            </div>
+        </div>
+
+        <!-- MODAL 2: VISOR DOCUMENTOS CANDIDATOS -->
+        <div id="document-modal" class="modal-overlay">
+            <div class="modal-card"><div class="modal-header"><h3>Visualizador de Documento</h3><span id="close-doc-modal-btn" class="modal-close-x">&times;</span></div>
+                <div class="modal-body" style="text-align: center;"><div id="modal-document-render" style="max-width:100%; padding:10px; background:#f4f4f4;"></div></div>
+            </div>
+        </div>
+
+        <!-- MODAL 3: REDACTAR / VER OBSERVACIONES INDIVIDUALES -->
+        <div id="obs-modal" class="modal-overlay">
+            <div class="modal-card">
+                <div class="modal-header"><h3>Observaciones del Candidato</h3><span id="close-obs-modal-btn" class="modal-close-x">&times;</span></div>
+                <div class="modal-body" style="padding:20px;">
+                    <textarea id="obs-modal-textarea" rows="6" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:4px; font-size:14px; box-sizing:border-box; outline:none; resize:vertical;"></textarea>
+                    <div style="text-align:right; margin-top:15px;"><button id="save-obs-modal-btn" class="btn-primary" style="padding:8px 16px;">Guardar Observación</button></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
